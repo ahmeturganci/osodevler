@@ -36,6 +36,7 @@ int main(){
     pthread_join(threads[0],NULL);
     pthread_join(threads[1],NULL);
     pthread_join(threads[2],NULL);
+	phread_exit(NULL);
     
 
 }
