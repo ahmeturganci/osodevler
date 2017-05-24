@@ -1,35 +1,24 @@
-#include<stdio.h>
-#include<pthread.h>
+#include <stdio.h>
+#include <pthread.h>
 
 #define boyut 1000
 #define threadBoyut 3
+
 void *Sirala(int arg[]);//Sıralama thread fonksiyonumuz.
 void *Birlestir(int arg); //Birleştirme thread fonksiyonumuz.
-void diziBirlestir(int dizi[],int sorted[]);
-void essizRastgeleSayiUret();
+
+void diziBirlestir(int dizi[],int sorted[]);//merge için kullanılan fonksiyon.
+void essizRastgeleSayiUret();// birbirinden farklı eşşiz sayılar üretmek için.
+
 int dizi[boyut];//sıralanması istenen dizi
 int yeniDizi[boyut];//birleştirilmesi istenen yeni dizi
 pthread_t threads[3];//threadlerimiz.
+
 int main(){
     int i = 0,j = 0;
-    /*
-    öncelikle 0-1000 arasında sayıları bir dizye alıp ardından bu sayıları kendi içerisinde sıralıyoruz.
-    */
-    /*for(i=0;i<boyut;i++){ // 0 - 1000 arasındaki değerler dizisi
-        dizi[i]=i;
-    }
-    // 0 - 1000 arasındaki değerler karıştırma
-    for(i = 0 ; i < boyut ; i++) {
-        int r = (rand()%(boyut-i))+i;
-        int temp = dizi[i];
-        dizi[i]=dizi[r];
-        dizi[r]=temp;
-    }*/
+    // Dizi de benzersiz sayılar üretmemizi sağlayan fonksiyon
     essizRastgeleSayiUret(dizi);
-    for (j = 0; j < boyut; ++j)
-    {
-        printf("%d. eleman %d\n", j,dizi[j]);
-    }
+    //başlama ve bitiş aralıkları için.
     int s[2];
     s[0]=0;
     s[1]=boyut/2;
@@ -44,13 +33,14 @@ int main(){
     pthread_join(threads[0],NULL);
     pthread_join(threads[1],NULL);
     pthread_join(threads[2],NULL);
-	pthread_exit(NULL);
-    
-
+	
+    pthread_exit(NULL);
 }
+
+//1000 elemanlı dizimiz için rastgele sayılar üretme fonksiyonumuz.
 void essizRastgeleSayiUret(int dizi[]){
 	int j,r,a,sayac=0;
-    srand ( time(NULL) );
+    srand ( time(NULL) );//bilgisayarın saatini çekirdek değeri olarak alıyor.
     while(sayac<boyut){
         a=rand();
         r=a%boyut;
@@ -60,8 +50,9 @@ void essizRastgeleSayiUret(int dizi[]){
         }
     }
 }
+// işlemlerin sonucunu istenildiği gibi 
 void dosyayaYaz(int dizi[]){
-    FILE *fp=fopen("sayilar.txt","a");
+    FILE *fp=fopen("sonuc.txt","a");
     int i;
     if(fp!=NULL){
         for ( i = 0;i<boyut;i++){
@@ -72,18 +63,12 @@ void dosyayaYaz(int dizi[]){
         printf("Yazmada Bir Hata Oluştu...");
     }
     fclose(fp);
-     
-    }
-
+}
+//verilen dizide ikiye bölünlenmiş değerleri kendi içerisine sıralamak
 void bubbleSort(int dizi[],int baslangicDeger, int bitisDegeri){
-    int temp;
-    int i, j;
-    
-
+    int temp, i, j;
     for (i=1; i<bitisDegeri-1; i++){
-        
         for (j=baslangicDeger; j<bitisDegeri-i; j++){
-            
             if(dizi[j] > dizi[j+1]){
             temp = dizi [j];
             dizi [j] = dizi [j+1];
@@ -92,32 +77,36 @@ void bubbleSort(int dizi[],int baslangicDeger, int bitisDegeri){
         }
     }
 }
+//içerisine gönderdiğimiz dizinin  belirlenen aralılardaki halini 
 void *Sirala(int arg[]){
     bubbleSort(dizi,arg[0],arg[1]);
 }
-
-
+// bubble sıralama ile 2 ayrı parça halinde sıralanmış olan dizi yi mergelediğimiz kısım.
 void *Birlestir(int arg){
-    //bubbleSort(dizi,0,boyut);
     diziBirlestir(dizi,yeniDizi);
     dosyayaYaz(yeniDizi);
     //dosyayaYaz(dizi);
-
 }
+// merge işlemi için kullandığımız fonksiyon.
 void diziBirlestir(int dizi[],int sorted[]){
-    int x,i, j, k,m,n;
-    int a[500],b[500];
-    for (x=0; x<1000; x++){
-        if(x>=500){
-            b[x-500]=dizi[x];
+    /*birleştirme işlemi sırasında istenilen merge işlemi için öncelikle
+    dizimizi 2 ye bölelim. */
+    int x, i, j, k, m, n;
+    int a[boyut/2],b[boyut/2];
+    for (x=0; x<boyut; x++){
+        if(x>=boyut/2){
+            b[x-boyut/2]=dizi[x];
         }
         else{
             a[x]=dizi[x];
         }
     }
-  m = n = 500;
-  j = k = 0;
- 
+
+    j = k = 0;//başlangıç değerleri
+    m = n = boyut/2;// bitiş değerleri
+    
+    // ilk dizinin elamanları ike 2. dizinin elemanları arasında bir sıralama işlemi 
+    //gerçekleştiriyoruz.
   for (i = 0; i < m + n;) {
     if (j < m && k < n) {
       if (a[j] < b[k]) {

@@ -4,21 +4,23 @@
 #include <stdlib.h>
 #include <semaphore.h>
 
-#define threadSayisi 5
+#define threadSayisi 5 //
 #define sandalyeSayisi 3
 pthread_t threads[threadSayisi];
+//kullandığımız semaforları tanımladık.
 sem_t beklemeSalonu;
 sem_t mutex;
 sem_t musteriler;
 sem_t berberler;
 void *berber(void *threadid);
 void *musteri(void *threadid);
+
 int bitis=0;
 int berberSayisi=1;
 
 void *berber(void *threadid){
   while(!bitis){
-      sem_wait(&musteriler);
+      sem_wait(&musteriler);//berber bir müşteri gelene kadar bekler.
       if(!bitis){
           printf("Berber saç kesiyor\nSaç kesildi.\n");
           sleep(2);
@@ -31,26 +33,28 @@ void *berber(void *threadid){
 }
 void *musteri(void *threadid){
     int id=*(int *)threadid;
+    //müşteriler bekleme odasında beklerler.
     sem_wait(&beklemeSalonu);
-    printf("%d.Musteri bekleme salonunda bekliyor \n", id);
+    printf("%d.Musteri bekleme salonunda bekliyor... \n", id);
     sleep(1);
-    sem_wait(&berberler);
-    sem_post(&beklemeSalonu);
-    sem_post(&musteriler);
-    sem_wait(&mutex);
-    sem_post(&berberler);
+    sem_wait(&berberler);// müşteri berberi bekler.
+    sem_post(&beklemeSalonu);//müşteri berber koltuğuna gelir.
+    printf("%d.Musteri bekleme salonunda ayrıldı... \n", id);
+    sem_post(&musteriler);//berber kesme işlemine hazırlanır
+    sem_wait(&mutex);//berberin işinin bitmesi beklenir.
+    sem_post(&berberler);//Müşterinin işi bittikten sonra berber boşa çıkar ve koltuk boşalır.
     printf("%d. Saç kesimi bitti\n",id);
 }
 
 int main(){
     printf("Berber birol devreye giriyor\n");
   pthread_t btid;
-  pthread_t tid[threadSayisi];
-  int i, numCustomers, numChairs;
+  pthread_t tid[threadSayisi];//müşteri sayısı kadar. 
+  int i, numCustomers, numChairs;//sandalye ve müşteri sayısı
   int Numbers[threadSayisi];
   numCustomers = threadSayisi;
   numChairs = sandalyeSayisi;
-  for (i = 0; i < numCustomers; i++)
+  for (i = 0; i < numCustomers; i++)//müşteri numaraları ile thread ilişkilendiriyoruz.
   {
     Numbers[i] = i;
   }
@@ -62,18 +66,18 @@ int main(){
 
   pthread_create(&btid, NULL, berber, NULL);
 
-  for (i = 0; i < numCustomers; i++)
+  for (i = 0; i < numCustomers; i++)//her müşteri için bir adet thread oluşturuyoruz.
   {
     pthread_create(&tid[i], NULL, musteri, (void *)&Numbers[i]);
   }
 
-  for (i = 0; i < numCustomers; i++)
+  for (i = 0; i < numCustomers; i++)//threadlerin işlermlerini bitirmesi bekleniyor.
   {
     pthread_join(tid[i], NULL);
   }
 
   bitis = 1;
-  sem_post(&musteriler); 
+  sem_post(&musteriler);
   pthread_join(btid, NULL);
     return 0;
 }
