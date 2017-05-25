@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <pthread.h>
+#include <time.h>
 
 #define boyut 1000
 #define threadBoyut 3
+#define rastgeleSayiAraligi 100000
 
 void *Sirala(int arg[]);//Sıralama thread fonksiyonumuz.
 void *Birlestir(int arg); //Birleştirme thread fonksiyonumuz.
@@ -42,7 +44,7 @@ void essizRastgeleSayiUret(int dizi[]){
 	int j,r,a,sayac=0;
     srand ( time(NULL) );//bilgisayarın saatini çekirdek değeri olarak alıyor.
     while(sayac<boyut){
-        a=rand();
+        a=rand()%rastgeleSayiAraligi;
         r=a%boyut;
         if(dizi[r]==0){
             dizi[r]=a;
@@ -52,7 +54,7 @@ void essizRastgeleSayiUret(int dizi[]){
 }
 // işlemlerin sonucunu istenildiği gibi 
 void dosyayaYaz(int dizi[]){
-    FILE *fp=fopen("sonuc.txt","a");
+    FILE *fp=fopen("sonuc.txt","w");
     int i;
     if(fp!=NULL){
         for ( i = 0;i<boyut;i++){
