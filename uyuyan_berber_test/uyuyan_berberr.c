@@ -4,9 +4,9 @@
 #include <stdlib.h>
 #include <semaphore.h>
 
-#define threadSayisi 5 //
-#define sandalyeSayisi 3
-pthread_t threads[threadSayisi];
+int threadSayisi = 0; // berber koltuk sayısı 
+int sandalyeSayisi = 0; // sandalye sayısı
+pthread_t threads[];
 //kullandığımız semaforları tanımladık.
 sem_t beklemeSalonu;
 sem_t mutex;
@@ -47,7 +47,17 @@ void *musteri(void *threadid){
 }
 
 int main(){
-    printf("Berber birol devreye giriyor\n");
+  printf("Berber birol devreye giriyor...\n");
+  printf("Koltuk sayısını giriniz:\n");
+  scanf("%d",&threadSayisi);
+
+  printf("Sandalye sayısını giriniz:\n");
+  scanf("%d",&sandalyeSayisi);
+   
+   threads[threadSayisi];
+
+
+  
   pthread_t btid;
   pthread_t tid[threadSayisi];//müşteri sayısı kadar. 
   int i, numCustomers, numChairs;//sandalye ve müşteri sayısı
@@ -59,6 +69,9 @@ int main(){
     Numbers[i] = i;
   }
 
+  
+
+  //semaforlarımızı oluşturduk.
   sem_init(&beklemeSalonu, 0, numChairs);
   sem_init(&berberler, 0, berberSayisi);
   sem_init(&musteriler, 0, 0);
