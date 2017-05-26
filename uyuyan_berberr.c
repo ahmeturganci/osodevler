@@ -19,8 +19,9 @@ int bitis=0;
 int berberSayisi=1;
 
 void *berber(void *threadid){
-  while(!bitis){
-      sem_wait(&musteriler);//berber bir müşteri gelene kadar bekler.
+
+  do {
+    sem_wait(&musteriler);//berber bir müşteri gelene kadar bekler.
       if(!bitis){
           printf("Berber saç kesiyor\nSaç kesildi.\n");
           sleep(2);
@@ -28,22 +29,23 @@ void *berber(void *threadid){
       }
       else{
           printf("Berber Kapandi.\n");
+          exit(1);
       }
-  }
+  } while(1);
 }
 void *musteri(void *threadid){
     int id=*(int *)threadid;
     //müşteriler bekleme odasında beklerler.
     sem_wait(&beklemeSalonu);
-    printf("%d.Musteri bekleme salonunda bekliyor... \n", id);
+    printf("%d.Musteri bekleme salonunda bekliyor... \n", id + 1);
     sleep(1);
     sem_wait(&berberler);// müşteri berberi bekler.
     sem_post(&beklemeSalonu);//müşteri berber koltuğuna gelir.
-    printf("%d.Musteri bekleme salonunda ayrıldı... \n", id);
+    printf("%d.Musteri bekleme salonunda ayrıldı... \n", id + 1);
     sem_post(&musteriler);//berber kesme işlemine hazırlanır
     sem_wait(&mutex);//berberin işinin bitmesi beklenir.
     sem_post(&berberler);//Müşterinin işi bittikten sonra berber boşa çıkar ve koltuk boşalır.
-    printf("%d. Saç kesimi bitti\n",id);
+    printf("%d. Saç kesimi bitti\n",id + 1);
 }
 
 int main(){
